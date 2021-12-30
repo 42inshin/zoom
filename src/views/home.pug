@@ -11,7 +11,10 @@ html(lang="ko")
 			h1 Soom
 		main
 			div#welcome
-				form
+				form#name
+					input(placeholder="nickname", required, type="text")
+					button Send
+				form#room_name
 					input(placeholder="room name", required, type="text")
 					button Enter Room
 				h4 Open Rooms:
@@ -19,11 +22,10 @@ html(lang="ko")
 			div#room
 				h3
 				ul
-				form#name
-					input(placeholder="nickname", required, type="text")
-					button Send
 				form#msg
 					input(placeholder="message", required, type="text")
 					button Send
+				a(href="/")
+					!= '<strong>exit</strong>'
 		script(src="/socket.io/socket.io.js")
 		script(src="/public/js/app.js")

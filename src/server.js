@@ -54,9 +54,10 @@ function countRoom(roomName) {
 }
 
 wsServer.on("connection", socket => {
+	wsServer.sockets.emit("room_change", publicRooms());
 	socket["nickname"] = "Anonymous";
 	socket.onAny((event) => {
-		console.log(wsServer.sockets.adapter);
+		// console.log(wsServer.sockets.adapter);
 		console.log(`socket Event: ${event}`);
 	});
 	socket.on("enter_room", (roomName, done) => {
@@ -79,6 +80,9 @@ wsServer.on("connection", socket => {
 	});
 	socket.on("nickname", (nickname) => socket["nickname"] = nickname);
 })
+
+const handleListen = () => console.log(`Listening on http://localhost:3000`);
+httpServer.listen(3000, handleListen);
 
 /*
 const wss = new WebSocket.Server({ server });
@@ -106,5 +110,3 @@ wss.on("connection", (socket) => {
 	});
 	// socket.send("hello!!!");
 }); */
-const handleListen = () => console.log(`Listening on http://localhost:3000`);
-httpServer.listen(3000, handleListen);
