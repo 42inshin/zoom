@@ -10,5 +10,11 @@ html(lang="ko")
 		header
 			h1 It works!
 		main
-			h2 Welcom to Soom
+			form#nick
+				input(type="text", placeholder="Choose a nickname", required)
+				button Save
+			ul
+			form#message
+				input(type="text", placeholder="Write a msg", required)
+				button Send
 		script(src="/public/js/app.js")
