@@ -9,7 +9,11 @@ html(lang="ko")
 	body
 		header
 			h1 Soom
-		main
+		main#myStream
 			video#myFace(autoplay, playsinline, width="400", height="400")
+			button#mute Mute
+			button#camera Turn Camera Off
+			select#cameras
+				option(value="device") Face Camera
 		script(src="/socket.io/socket.io.js")
 		script(src="/public/js/app.js")
