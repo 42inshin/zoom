@@ -6,14 +6,17 @@ const cameraBtn = document.getElementById("camera");
 const camerasSelect = document.getElementById("cameras");
 
 const call = document.getElementById("call");
+const chat = document.getElementById("chat");
 
 call.hidden = true;
+chat.hidden = true;
 
 let myStream;
 let muted = false;
 let cameraOff = false;
 let roomName;
 let myPeerConnection;
+let myDataChannel;
 
 async function getCameras() {
 	try {
@@ -93,11 +96,13 @@ camerasSelect.addEventListener("input", handleCameraChange);
 // Welcome Form (join a room)
 const welcome = document.getElementById("welcome");
 
-welcomeForm = welcome.querySelector("form");
+const welcomeForm = welcome.querySelector("form");
+const chatForm = chat.querySelector("form");
 
 async function initCall() {
 	welcome.hidden = true;
 	call.hidden = false;
+	chat.hidden = false;
 	await getMedia();
 	makeConnection();
 }
@@ -110,19 +115,58 @@ async function handleWelcomeSubmit(event) {
 	roomName = input.value;
 	input.value = "";
 }
+function scrollToBottom() {
+	const messageWindow = chat.querySelector("ul");
+	messageWindow.scrollTop = messageWindow.scrollHeight;
+}
+
+function handleChatSubmit(event) {
+	event.preventDefault();
+	const input = chatForm.querySelector("input");
+	const ul = chat.querySelector("ul");
+	const li = document.createElement("li");
+	const span = document.createElement("span");
+	span.innerText = input.value;
+	span.style.backgroundColor = "#ff2f9";
+	li.appendChild(span);
+	myDataChannel.send(input.value);
+	li.style.textAlign = "right";
+	ul.appendChild(li);
+	input.value = "";
+	scrollToBottom();
+}
+
+function addMessage(message) {
+	const ul = chat.querySelector("ul");
+	const li = document.createElement("li");
+	const span = document.createElement("span");
+	span.innerText = message;
+	span.style.backgroundColor = "#e4ebf1";
+	li.appendChild(span);
+	ul.appendChild(li);
+	scrollToBottom();
+}
 
 welcomeForm.addEventListener("submit", handleWelcomeSubmit);
+chatForm.addEventListener("submit", handleChatSubmit);
 
 // Socket code
 // Peer A
 socket.on("welcome", async () => {
+	myDataChannel = myPeerConnection.createDataChannel("chat");
+	myDataChannel.addEventListener("message", (event) => addMessage(event.data));
+	console.log("made data channel");
 	const offer = await myPeerConnection.createOffer();
 	myPeerConnection.setLocalDescription(offer);
 	console.log("Sent the offer");
 	socket.emit("offer", offer, roomName);
-})
+});
 // Peer B
 socket.on("offer", async (offer) => {
+	myPeerConnection.addEventListener("datachannel", (event) => {
+		myDataChannel = event.channel;
+		myDataChannel.addEventListener("message", (event) => addMessage(event.data));
+	});
 	console.log("received the offer");
 	myPeerConnection.setRemoteDescription(offer);
 	const answer = await myPeerConnection.createAnswer();
@@ -131,9 +175,9 @@ socket.on("offer", async (offer) => {
 	console.log("sent the answer");
 });
 
-socket.on("answer", answer => {
+socket.on("answer", async answer => {
 	console.log("received the answer");
-	myPeerConnection.setRemoteDescription(answer);
+	await myPeerConnection.setRemoteDescription(answer);
 });
 
 socket.on("ice", async (ice) => {
@@ -144,18 +188,31 @@ socket.on("ice", async (ice) => {
 // RTC code
 
 function makeConnection() {
-	myPeerConnection = new RTCPeerConnection();
+	myPeerConnection = new RTCPeerConnection({
+		iceServers: [
+			{
+				urls: [
+					"stun:stun.l.google.com:19302",
+					"stun:stun1.l.google.com:19302",
+					"stun:stun2.l.google.com:19302",
+					"stun:stun3.l.google.com:19302",
+				],
+			},
+		],
+	});
 	myPeerConnection.addEventListener("icecandidate", handleIce);
-	myPeerConnection.addEventListener("addstream", handleAddStream);
+	// myPeerConnection.addEventListener("addstream", handleAddStream);
+	// safari 기반 브라우저 동작을 위해서 수정
+	myPeerConnection.addEventListener("track", handleAddStream);
 	myStream.getTracks().forEach(track => myPeerConnection.addTrack(track, myStream));
 }
 
-function handleIce(data) {
+async function handleIce(data) {
 	console.log("sent candidate");
-	socket.emit("ice", data.candidate, roomName);
+	await socket.emit("ice", data.candidate, roomName);
 }
 
 function handleAddStream(data) {
 	const peerFace = document.getElementById("peerFace");
-	peerFace.srcObject = data.stream;
+	peerFace.srcObject = data.streams[0];
 }

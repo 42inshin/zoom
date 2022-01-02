@@ -4,21 +4,30 @@ html(lang="ko")
 		meta(charset="UTF-8")
 		meta(http-equiv="X-UA-Compatible", content="IE=edge")
 		meta(name="viewport", content="width=device-width, initial-scale=1.0")
-		title Soom
+		title Noom
 		link(rel="stylesheet", href="https://unpkg.com/mvp.css")
+		link(rel="stylesheet", href="/public/css/style.css")
 	body
 		header
-			h1 Soom
+			h1 Noom
 		main#myStream
 			div#welcome
 				form
 					input(placeholder="room name", required, type="text")
-					button Enter room
+					button Enter
 			div#call
-				video#myFace(autoplay, playsinline, width="400", height="400")
-				button#mute Mute
-				button#camera Turn Camera Off
-				select#cameras
-				video#peerFace(autoplay, playsinline, width="400", height="400")
+				.video
+					video#myFace(autoplay, playsinline, width="400", height="300")
+					video#peerFace(autoplay, playsinline, width="400", height="300")
+				.settings
+					div
+						button#mute Mute
+						button#camera Turn Camera Off
+					select#cameras
+			div#chat
+				ul
+				form
+					input(placeholder="Send message" required, type="text")
+					button Send
 		script(src="/socket.io/socket.io.js")
 		script(src="/public/js/app.js")
