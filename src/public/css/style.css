@@ -71,7 +71,7 @@ button {
 	border: none;
 	box-sizing: border-box;
     box-shadow: -5px -5px 10px #fafbff, 5px 5px 10px rgba(22, 27, 29, .23);
-
+	color: #333;
 }
 
 #call .video {
