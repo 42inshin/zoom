@@ -1,7 +1,7 @@
 # Noom
 
-NodeJS, WebRTC and Websockets을 사용한 ZOOM 클론 코딩 레포지토리입니다.
-첫 화면에서 방번호를 적어 영상통화 및 채팅을 이용할 수 있습니다.
+NodeJS, WebRTC and Socket.io 사용한 ZOOM 클론 코딩 레포지토리입니다.
+첫 화면에서 방번호를 적으면, 영상통화 및 채팅을 이용할 수 있습니다.
 
 ## start
 ```bash
